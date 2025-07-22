@@ -1,24 +1,23 @@
 "use client";
 import React, { useState } from "react";
-import { subcategories } from "@/app/components/data/subcategories";
+import { v4 as uuidv4 } from "uuid";
 import Categories from "@/app/Categories";
 import Bill from "@/app/Bill";
+import { MasaPageProps, Product } from "@/app/types";
 
-interface MasaPageProps {
-  params: { id: string };
-}
-
-interface Product {
-  productName: string;
-  price: number;
-}
-
-const MasaPage: React.FC<MasaPageProps> = ({ params }) => {
+const MasaPage: React.FC<MasaPageProps> = ({ params, item }) => {
   const { id } = params;
   const [billItems, setBillItems] = useState<Product[]>([]);
 
-  const handleAddToBill = (item: Product) => {
-    setBillItems((prev) => [...prev, item]);
+  const handleAddToBill = (item: Omit<Product, "uniqueId">) => {
+    const itemWithId: Product = { ...item, uniqueId: uuidv4() };
+    setBillItems((prev) => [...prev, itemWithId]);
+  };
+
+  const handleDelete = (itemToDelete: Product) => {
+    setBillItems((prev) =>
+      prev.filter((item) => item.uniqueId !== itemToDelete.uniqueId)
+    );
   };
 
   return (
@@ -39,7 +38,7 @@ const MasaPage: React.FC<MasaPageProps> = ({ params }) => {
         </div>
 
         <h2 className="text-4xl mt-20">{`Маса ${id}`}</h2>
-        <Bill billItems={billItems} />
+        <Bill billItems={billItems} item={item} onDelete={handleDelete} />
       </div>
     </div>
   );
