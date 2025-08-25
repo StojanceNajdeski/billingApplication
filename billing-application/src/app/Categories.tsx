@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef, useState } from "react";
 import { subcategories } from "./components/data/subcategories";
+import { CategoriesProps } from "./types";
 
 const foodCategories = [
   { name: "Топли Пијалоци", key: "topliPijaloci" },
@@ -24,15 +25,6 @@ const foodCategories = [
   { name: "Бургери", key: "burgeri" },
 ];
 
-interface Product {
-  productName: string;
-  price: number;
-}
-
-interface CategoriesProps {
-  onAddToBill: (item: Product) => void;
-}
-
 const Categories: React.FC<CategoriesProps> = ({ onAddToBill }) => {
   const [openedCategory, setOpenedCategory] = useState<string | null>(null);
 
@@ -44,7 +36,7 @@ const Categories: React.FC<CategoriesProps> = ({ onAddToBill }) => {
     }
   };
   return (
-    <div>
+    <div className="min-w-lg">
       <ul className="space-y-2 text-left">
         {foodCategories.map((cat) => (
           <li key={cat.key} className="mb-2">

@@ -9,20 +9,22 @@ const LoginComponent = () => {
   const [error, setError] = useState("");
 
   const router = useRouter();
-  const users = [
+  const waiters = [
     {
       braneUsername: "branep",
       branePassword: "branep",
     },
   ];
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const isValid = users.find(
+    const isValid = waiters.find(
       (user) =>
         user.braneUsername === username && user.branePassword === password
     );
 
     if (isValid) {
+      localStorage.setItem("loggedInWaiter", isValid.braneUsername);
       router.push("/mainComponent");
     } else {
       setError("Погрешно корисничко име или лозинка");

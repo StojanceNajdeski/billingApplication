@@ -3,3 +3,27 @@
 body {
   background-color: darkgray;
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #print-area,
+  #print-area * {
+    visibility: visible;
+  }
+  #print-area {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 308px;
+    padding: 10px;
+    font-size: 12pt;
+    background: white;
+    box-sizing: border-box;
+  }
+  button,
+  path {
+    display: none;
+  }
+}
