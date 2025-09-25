@@ -6,30 +6,37 @@ import { useState } from "react";
 const LoginComponent = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
   const router = useRouter();
-  const waiters = [
-    {
-      braneUsername: "branep",
-      branePassword: "branep",
-    },
-  ];
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const isValid = waiters.find(
-      (user) =>
-        user.braneUsername === username && user.branePassword === password
-    );
+    setError("");
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
 
-    if (isValid) {
-      localStorage.setItem("loggedInWaiter", isValid.braneUsername);
-      router.push("/mainComponent");
-    } else {
-      setError("Погрешно корисничко име или лозинка");
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Неуспешна најава !");
+        return;
+      }
+
+      console.log("Logged in user:", data.user);
+      localStorage.setItem("loggedUser", JSON.stringify(data.user));
+
+      router.push("/landingPage");
+    } catch (error) {
+      setError("Настана грешка. Обидете се повторно.");
     }
-  };
+  }
+
   return (
     <div className="relative h-screen w-full ">
       <div className="absolute top-1/2 left-1/2 bg-white/30 backdrop-blur-md p-20 rounded-2xl  transform -translate-x-1/2 -translate-y-1/2">
@@ -64,7 +71,7 @@ const LoginComponent = () => {
           </div>
           <div>
             <input
-              type="text"
+              type="password"
               id="password"
               value={password}
               onChange={(e) => {

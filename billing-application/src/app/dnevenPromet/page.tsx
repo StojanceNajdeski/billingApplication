@@ -1,9 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { BillProps, Product } from "../types";
+import { BillsView } from "../types";
 
 const DnevenPromet: React.FC = () => {
-  const [soldItems, setSoldItems] = useState<Product[]>([]);
+  const [bills, setBills] = useState<BillsView[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const handleDailyReport = () => {
     const today = new Date().toLocaleDateString("mk-MK");
 
@@ -18,27 +20,29 @@ const DnevenPromet: React.FC = () => {
     localStorage.removeItem("lastBillNumber");
     localStorage.setItem("lastReportDate", today);
   };
-
   useEffect(() => {
-    const data = JSON.parse(localStorage.getItem("soldItems") || "[]");
-    setSoldItems(data);
+    const fetchBills = async () => {
+      try {
+        const response = await fetch("/api/bills/all");
+        if (!response.ok) {
+          throw new Error("Грешка при вчитување на податоците.");
+        }
+        const data = await response.json();
+        console.log("Податоци добиени од API:", data);
+        setBills(data);
+      } catch (error) {
+        if (error instanceof Error) {
+          setError(error.message);
+        } else {
+          setError("Настана непозната грешка. ");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBills();
   }, []);
-
-  const groupedItems = soldItems.reduce<
-    Record<string, { price: number; quantity: number }>
-  >((acc, item) => {
-    if (!acc[item.productName]) {
-      acc[item.productName] = { price: item.price, quantity: 1 };
-    } else {
-      acc[item.productName].quantity += 1;
-    }
-    return acc;
-  }, {});
-
-  const totalPrice = soldItems.reduce(
-    (sum, item) => sum + (item.price ?? 1),
-    0
-  );
 
   return (
     <div>
@@ -52,7 +56,7 @@ const DnevenPromet: React.FC = () => {
         <br />
       </div>
       <div className="block print:hidden">
-        <div className="flex justify-center ">
+        <div className="flex justify-center">
           <table className="w-3/6 text-center border bg-white border-collapse">
             <thead>
               <tr>
@@ -62,43 +66,26 @@ const DnevenPromet: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {Object.entries(groupedItems).map(
-                ([productName, data], index) => (
-                  <tr key={index}>
-                    <td className="border p-2 text-left">{productName}</td>
-                    <td className="border p-2">{data.quantity}</td>
-                    <td className="border p-2">{data.price * data.quantity}</td>
+              {bills.map((bill) =>
+                bill.bill_data.map((item: any) => (
+                  <tr key={item.uniqueId}>
+                    <td className="border p-2">{item.productName}</td>
+                    <td className="border p-2">{item.quantity}</td>
+                    <td className="border p-2">{item.price}</td>
                   </tr>
-                )
+                ))
               )}
-              <tr>
-                <td className="text-left border text-2xl">Вкупно</td>
-                <td className="border text-2xl" colSpan={2}>
-                  {totalPrice}
-                </td>
-              </tr>
             </tbody>
           </table>
         </div>
-      </div>
-      <div className="hidden print:block" id="dneven-izvestaj">
-        <div className="flex justify-center">
-          <div className="w-3/6 bg-white border-collapse">
-            <div className="grid grid-cols-3 gap-2 p-2 font-bold text-center border-b border-black">
-              <p>Производ</p>
-              <p>Количина</p>
-              <p>Цена</p>
-            </div>
-            {Object.entries(groupedItems).map(([productName, data], index) => (
-              <div key={index} className="grid grid-cols-3 gap-2 p-2 border-b">
-                <p className="text-left">{productName}</p>
-                <p className="text-center">{data.quantity}</p>
-                <p className="text-right">{data.price * data.quantity}</p>
+        <div className="hidden print:block" id="dneven-izvestaj">
+          <div className="flex justify-center">
+            <div className="w-3/6 bg-white border-collapse">
+              <div className="grid grid-cols-3 gap-2 p-2 font-bold text-center border-b border-black">
+                <p>Производ</p>
+                <p>Количина</p>
+                <p>Цена</p>
               </div>
-            ))}
-            <div className="grid grid-cols-3 gap-2 p-2 mt-2 text-2xl font-bold">
-              <p className="col-span-2 text-left">Вкупно</p>
-              <p className="text-right">{totalPrice}</p>
             </div>
           </div>
         </div>

@@ -8,10 +8,14 @@ import Calculator from "../Calculator";
 const MainComponent = () => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [username, setUsername] = useState<string | null>(null);
   useEffect(() => {
-    const currentWaiter = localStorage.getItem("loggedInWaiter");
+    const currentWaiter = localStorage.getItem("loggedUser");
     if (!currentWaiter) {
       router.push("/loginComponent");
+    } else {
+      setUsername(JSON.parse(currentWaiter).username);
     }
   }, [router]);
 
@@ -49,14 +53,21 @@ const MainComponent = () => {
   ];
 
   const currentWaiter =
-    typeof window !== "undefined"
-      ? localStorage.getItem("loggedInWaiter")
-      : null;
+    typeof window !== "undefined" ? localStorage.getItem("loggedUser") : null;
 
   const handleLogout = () => {
-    localStorage.removeItem("loggedInWaiter");
+    localStorage.removeItem("loggedUser");
     router.push("/loginComponent");
   };
+
+  useEffect(() => {
+    const user = localStorage.getItem("loggedUser");
+    if (!user) {
+      router.push("/loginComponent");
+    } else {
+      setUser(JSON.parse(user));
+    }
+  }, []);
 
   if (!currentWaiter) {
     return null;
@@ -65,34 +76,13 @@ const MainComponent = () => {
   const storedTables = localStorage.getItem("dodadenoJadenje");
   return (
     <div className="w-[95%] mx-auto">
-      <div className="list-none mt-15 mb-20 text-2xl gap-5">
+      <div className="list-none mt-12 mb-15 text-2xl gap-5">
+        <h2 className="text-4xl mb-8">
+          <b>Келнер: </b>
+          {username}
+        </h2>
         <div className="flex p-4 overflow-auto">
-          <div className="basis-1/5">
-            <h2 className="mb-6">
-              <b>Келнер: </b>
-              {currentWaiter}
-            </h2>
-            <button
-              className="bg-red-500 text-white py-3 mb-5 rounded-xl hover:bg-red-600  cursor-pointer duration-300 mr-5 w-100"
-              onClick={handleLogout}
-            >
-              Одјави се
-            </button>
-            <button className="bg-blue-500 text-white py-3 rounded-xl hover:bg-blue-600  cursor-pointer duration-300 mr-5 w-100">
-              <Link href="/dnevenPromet">Дневен извештај</Link>
-            </button>
-            <button className="bg-blue-500 text-white py-3 mt-5 rounded-xl hover:bg-blue-600  cursor-pointer duration-300 mr-5 w-100">
-              <Link href="/kontrolenIzvestaj">Контролен извештај</Link>
-            </button>
-            <button
-              className="bg-blue-500 text-white py-3 mt-5 rounded-xl hover:bg-blue-600  cursor-pointer duration-300 mr-5 w-100"
-              onClick={() => setIsOpen(true)}
-            >
-              Калкулатор
-            </button>
-            <Calculator isOpen={isOpen} setIsOpen={setIsOpen} />
-          </div>
-          <div className="grid basis-4/5 cursor-pointer sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
+          <div className="grid basis-full cursor-pointer sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-7">
             {tables.map((table) => {
               const isFull =
                 typeof window !== "undefined" &&
@@ -104,9 +94,9 @@ const MainComponent = () => {
                   onClick={() => router.push(`/masa/${table.id}`)}
                   className="transition-transform duration-300 hover:scale-95 bg-gray-700/80 text-white rounded-xl p-6 shadow-lg flex flex-col items-center justify-center h-40"
                 >
-                  <h2 className="text-xl font-bold mb-2">Маса {table.id}</h2>
+                  <h2 className="text-2xl font-bold mb-2">Маса {table.id}</h2>
                   <p
-                    className={`text-lg ${
+                    className={`text-2xl ${
                       isFull ? "text-red-500" : "text-green-500"
                     }`}
                   >

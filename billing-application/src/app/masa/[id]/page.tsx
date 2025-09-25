@@ -11,7 +11,7 @@ const MasaPage: React.FC<MasaPageProps> = ({ params, item, onAddToBill }) => {
   const unwrappedParams = use(params);
   const { id } = unwrappedParams;
   const [billItems, setBillItems] = useState<BillItem[]>([]);
-  const [loggedInWaiter, setLoggedInWaiter] = useState<string>();
+  const [loggedInWaiter, setLoggedInWaiter] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(-1);
 
@@ -118,18 +118,27 @@ const MasaPage: React.FC<MasaPageProps> = ({ params, item, onAddToBill }) => {
   const router = useRouter();
 
   useEffect(() => {
-    const stored = localStorage.getItem(`dodadenoJadenje_${id}`);
-    if (stored) {
+    const currentWaiter = localStorage.getItem("loggedUser");
+    if (currentWaiter) {
       try {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) setBillItems(parsed);
-        else setBillItems([]);
-      } catch {
-        setBillItems([]);
-      }
-    }
+        const parsedWaiter = JSON.parse(currentWaiter);
 
-    const storedWaiter = localStorage.getItem("loggedInWaiter");
+        if (parsedWaiter.username) {
+          setLoggedInWaiter(parsedWaiter.username);
+        } else {
+          setLoggedInWaiter(null);
+        }
+      } catch (error) {
+        console.error("Грешка при парсирање на корисник:", error);
+        setLoggedInWaiter(null);
+      }
+    } else {
+      router.push("/loginComponent");
+    }
+  }, [router]);
+
+  useEffect(() => {
+    const storedWaiter = localStorage.getItem("loggedUser");
     if (!storedWaiter) {
       router.push("/loginComponent");
     } else {
@@ -232,6 +241,7 @@ const MasaPage: React.FC<MasaPageProps> = ({ params, item, onAddToBill }) => {
               onDelete={handleDelete}
               onClearBill={handleClearBill}
               onUpdateQuantity={handleUpdateQuantity}
+              masaId={id}
               waiterNames={loggedInWaiter}
             />
           </div>

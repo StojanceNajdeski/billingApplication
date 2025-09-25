@@ -3,6 +3,8 @@ import { faSquareXmark } from "@fortawesome/free-solid-svg-icons/faSquareXmark";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
 import { BillProps } from "./types";
+import { getUsername } from "./utils/user";
+import { useRouter } from "next/navigation";
 
 const Bill: React.FC<BillProps> = ({
   billItems,
@@ -10,17 +12,30 @@ const Bill: React.FC<BillProps> = ({
   onClearBill,
   onUpdateQuantity,
   waiterNames,
+  masaId,
 }: BillProps) => {
+  const [username, setUsername] = useState<string | null>(null);
   const totalPrice = billItems.reduce(
     (sum, item) => sum + item.price * (item.quantity ?? 1),
     0
   );
   const [billNumber, setBillNumber] = useState<number>(1);
 
+  const router = useRouter();
+
   useEffect(() => {
     const lastBill = localStorage.getItem("lastBillNumber");
     if (lastBill) {
       setBillNumber(Number(lastBill) + 1);
+    }
+    setUsername(getUsername());
+
+    const storedWaiter = localStorage.getItem("loggedUser");
+    if (!storedWaiter) {
+      router.push("/loginComponent");
+    } else {
+      const parsedUser = JSON.parse(storedWaiter);
+      setUsername(parsedUser.username);
     }
   }, []);
 
@@ -36,14 +51,37 @@ const Bill: React.FC<BillProps> = ({
     minute: "2-digit",
   });
 
-  const handlePrintBill = () => {
-    const soldItems = JSON.parse(localStorage.getItem("soldItems") || "[]");
-    const updatedSoldItems = [...soldItems, ...billItems];
+  const handlePrintBill = async () => {
+    const tableId = masaId;
 
-    localStorage.setItem("soldItems", JSON.stringify(updatedSoldItems));
-    localStorage.setItem("lastBillNumber", billNumber.toString());
+    const mergeBillData = billItems.reduce((acc: any[], item) => {
+      const existing = acc.find((i) => i.productName === item.productName);
+      if (existing) {
+        existing.quantity += item.quantity;
+      } else {
+        acc.push({ ...item });
+      }
+      return acc;
+    }, []);
+
+    try {
+      const response = await fetch("/api/bills/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tableId: masaId,
+          billData: mergeBillData,
+          totalAmount: mergeBillData.reduce(
+            (sum, item) => sum + item.price * item.quantity,
+            0
+          ),
+          waiterNames,
+        }),
+      });
+    } catch (error) {
+      console.error("Настана грешка:", error);
+    }
     window.print();
-    setBillNumber((prev) => prev + 1);
     onClearBill();
   };
 
@@ -141,7 +179,7 @@ const Bill: React.FC<BillProps> = ({
                 </h2>
               </div>
               <div>
-                <h2>Келнер: {waiterNames}</h2>
+                <h2>Келнер: {username}</h2>
               </div>
             </div>
             <li className="flex justify-between mx-auto font-bold text-center">

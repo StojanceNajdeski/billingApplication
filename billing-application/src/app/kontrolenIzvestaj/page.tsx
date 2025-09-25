@@ -2,16 +2,15 @@
 import React, { useEffect, useState } from "react";
 import { BillProps, Product } from "../types";
 
-const DnevenPromet: React.FC = () => {
+const KontrolenIzvestaj: React.FC = () => {
   const [soldItems, setSoldItems] = useState<Product[]>([]);
   const handleDailyReport = () => {
     window.print();
-    localStorage.removeItem("soldItems");
     localStorage.removeItem("lastBillNumber");
   };
 
   useEffect(() => {
-    const data = JSON.parse(localStorage.getItem("soldItems") || "[]");
+    const data = JSON.parse(localStorage.getItem("soldItemsCheck") || "[]");
     setSoldItems(data);
   }, []);
 
@@ -98,4 +97,4 @@ const DnevenPromet: React.FC = () => {
   );
 };
 
-export default DnevenPromet;
+export default KontrolenIzvestaj;
