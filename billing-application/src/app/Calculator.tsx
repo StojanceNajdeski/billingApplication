@@ -12,10 +12,10 @@ const Calculator: React.FC<CalculatorProps> = ({ isOpen, setIsOpen }) => {
     <div>
       {isOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40">
-          <div className="bg-white p-5 rounded-2xl shadow-2xl relative">
-            <h2 className="text-center text-4xl pt-6">Калкулатор</h2>
+          <div className="bg-white p-8 rounded-2xl shadow-2xl relative">
+            <h2 className="text-center text-5xl pt-6">Калкулатор</h2>
             <p
-              className="absolute right-3 top-3 bg-red-500 text-white px-4 pb-2 pt-1 rounded-4xl"
+              className="absolute right-3 top-3 bg-red-500 text-3xl text-white px-4 pb-2 pt-1 rounded-4xl"
               onClick={() => {
                 setIsOpen(false);
                 setBillValue("");
@@ -26,11 +26,13 @@ const Calculator: React.FC<CalculatorProps> = ({ isOpen, setIsOpen }) => {
             </p>
             <div className="flex p-6">
               <div className="mr-5">
-                <label htmlFor="text">Дадени пари</label>
+                <label htmlFor="text" className="text-3xl">
+                  Дадени пари
+                </label>
                 <br />
                 <input
                   type="number"
-                  className="border rounded-lg"
+                  className="border rounded-lg text-4xl"
                   value={givedMoney}
                   onChange={(e) => {
                     setGivedMoney(e.target.value);
@@ -38,11 +40,13 @@ const Calculator: React.FC<CalculatorProps> = ({ isOpen, setIsOpen }) => {
                 />
               </div>
               <div className="mr-5">
-                <label htmlFor="text">Износ на сметка</label>
+                <label htmlFor="text" className="text-3xl">
+                  Износ на сметка
+                </label>
                 <br />
                 <input
                   type="number"
-                  className="border rounded-lg"
+                  className="border rounded-lg text-4xl"
                   value={billValue}
                   onChange={(e) => {
                     setBillValue(e.target.value);
@@ -50,11 +54,13 @@ const Calculator: React.FC<CalculatorProps> = ({ isOpen, setIsOpen }) => {
                 />
               </div>
               <div>
-                <label htmlFor="text">Вкупно</label>
+                <label htmlFor="text" className="text-3xl">
+                  Вкупно
+                </label>
                 <br />
                 <input
                   type="number"
-                  className="border rounded-lg"
+                  className="border rounded-lg text-4xl"
                   disabled
                   value={Number(givedMoney) - Number(billValue)}
                 />
